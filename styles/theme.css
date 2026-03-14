@@ -1,0 +1,246 @@
+/* ===== CINEMATIC GRAND SLAM BACKGROUND ===== */
+
+/* ===== REALISTIC GRASS COURT BACKGROUND ===== */
+
+/* ===== Intro animation ===== */
+.intro-line{
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: 0.6px;
+  color: rgba(255,255,255,0.94);
+  text-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  margin: 0.45rem 0;
+  line-height: 1.5;
+}
+
+/* First line = stadium announcement */
+.intro-line:first-child{
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+/* Make the short punch lines stronger */
+.intro-line:nth-child(2),
+.intro-line:nth-child(3),
+.intro-line:nth-child(4){
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.intro-card{
+  padding: 1.1rem 1.2rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.28),
+    rgba(0,0,0,0.18)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.35);
+}
+
+
+@keyframes fadeIn{
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.howto-line{
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  opacity: 0.9;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+}
+
+
+.title-wrapper{
+  display: block !important;      /* 👈 hard force vertical stacking */
+  margin: 8px 0 14px 0;
+}
+
+.title-row{
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sub-title{
+  display: block !important;      /* 👈 ensures it drops below */
+  width: 100%;
+  margin-top: 6px;
+  margin-left: 46px;             /* aligns under title text after ball */
+  font-size: 0.95rem;
+  opacity: 0.85;
+  letter-spacing: 0.2px;
+}
+
+
+/* “Court entrance” slide-in */
+@keyframes slideInLeft {
+  from { transform: translateX(-26px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(26px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.slide-left  { animation: slideInLeft  700ms ease-out both; }
+.slide-right { animation: slideInRight 700ms ease-out both; }
+
+/* Final static “glass card” for the intro */
+.intro-card{
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ===== Custom Grand Slam Title ===== */
+
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+.grand-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0;
+  color: white;
+  text-shadow:
+    0 0 12px rgba(255,255,255,0.4),
+    0 0 35px rgba(0,200,255,0.3);
+}
+
+/* Bouncing tennis ball beside title */
+.title-ball {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f7ff8a 0%, #c9ff37 40%, #7ee000 100%);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+  animation: bounce-title 1s infinite ease-in-out;
+}
+
+@keyframes bounce-title {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+/* Vignette spotlight (dark edges) */
+.stApp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center,
+    rgba(0,0,0,0) 40%,
+    rgba(0,0,0,0.55) 100%);
+  z-index: 0;
+}
+
+/* Subtle particle texture */
+.stApp::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.12;
+  z-index: 0;
+}
+
+/* ===== Realistic grass strip at bottom ===== */
+/* Baseline highlight above the grass */
+
+
+/* Make everything else sit ABOVE overlays */
+.stApp > div { position: relative; z-index: 1; }
+
+/* ===== Main glass stage (center panel) ===== */
+.main .block-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.6rem 1.8rem 2.2rem 1.8rem;
+
+  background: rgba(10, 25, 40, 0.50);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ===== UI polish ===== */
+.block-container { padding-top: 1.4rem; }
+footer { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+.stChatInput textarea { border-radius: 14px; }
+
+/* Chat bubble spacing */
+[data-testid="stChatMessage"] { padding: 0.25rem 0.15rem; }
+[data-testid="stChatMessageContent"] {
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  line-height: 1.45;
+  backdrop-filter: blur(7px);
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* Assistant bubble */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"])
+[data-testid="stChatMessageContent"] {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Copyright directly under the chat input */
+[data-testid="stChatInput"]{
+  position: relative;
+  padding-bottom: 26px; /* space for the line under the input */
+}
+
+[data-testid="stChatInput"]::after{
+  content: "© 2026 Pramita Pandit. CourtSide™";
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.65;
+  margin-top: 6px;
+  letter-spacing: 0.2px;
+}
+
+/* ===== Tennis balls animation ===== */
+.tennis-stage { margin: 8px 0 12px 0; }
+.tennis-row { display:flex; gap:14px; height:60px; align-items:flex-end; }
+.tennis-ball {
+  width:22px; height:22px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #f7ff8a 0%, #c9ff37 40%, #7ee000 100%);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-26px); }
+}
+.b1 { animation: bounce 0.75s infinite; }
+.b2 { animation: bounce 0.75s infinite 0.12s; }
+.b3 { animation: bounce 0.75s infinite 0.24s; }

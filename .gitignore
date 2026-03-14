@@ -1,0 +1,13 @@
+# .gitignore
+.env
+__pycache__/
+*.pyc
+*.pyo
+chroma_db/
+data/news/
+venv/
+.venv/
+.streamlit/secrets.toml
+*.egg-info/
+dist/
+.DS_Store
