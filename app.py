@@ -16,19 +16,16 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 
-#set_bg(str(BASE_DIR / "assets" / "grass_blur.png"))
-#load_css(str(BASE_DIR / "styles" / "theme.css"))
-
-
 load_dotenv()
 
 DATA_DIR = "data"
 DB_DIR = "chroma_db"
 
+
+# ---------------- Background & CSS ----------------
 def set_bg(image_path: str):
     with open(image_path, "rb") as f:
         data = base64.b64encode(f.read()).decode()
-
     st.markdown(
         f"""
         <style>
@@ -45,6 +42,13 @@ def set_bg(image_path: str):
         """,
         unsafe_allow_html=True
     )
+
+
+def load_css(path: str):
+    with open(path, "r", encoding="utf-8") as f:
+        css = f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
 
 # ---------------- LLM ----------------
 def groq_chat(api_key: str, messages: list, system_msg: str,
@@ -63,6 +67,7 @@ def groq_chat(api_key: str, messages: list, system_msg: str,
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"]
 
+
 # ---------------- Vector DB ----------------
 @st.cache_resource
 def load_db():
@@ -79,7 +84,7 @@ def load_db():
         src = doc.metadata.get("source", "")
         doc.metadata["type"] = "news" if "news" in src else "knowledge"
 
-    # Better chunking — smaller chunks, more overlap
+    # Better chunking — smaller chunks, more overlap = more precise retrieval
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=600,
         chunk_overlap=200
@@ -94,19 +99,17 @@ def load_db():
         embedding_function=embeddings
     )
 
-    # Always re-index — clears stale data, picks up new articles
-    vectordb._collection.delete(where={"type": {"$in": ["news", "knowledge"]}})
+    # Always re-index so new news articles are picked up fresh
+    vectordb._collection.delete(
+        where={"type": {"$in": ["news", "knowledge"]}}
+    )
     if chunks:
         vectordb.add_documents(chunks)
 
     return vectordb
 
 
-def load_css(path: str):
-    with open(path, "r", encoding="utf-8") as f:
-        css = f.read()
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-
+# ---------------- Helpers ----------------
 def unique_sources(docs):
     srcs = []
     for d in docs:
@@ -128,6 +131,7 @@ def render_thinking_animation():
       <div class="thinking-text">🎾 Rallying the sources…</div>
     </div>
     """
+
 
 def render_settled_court():
     return """
@@ -152,6 +156,7 @@ def render_settled_court():
     </div>
     """
 
+
 def random_tennis_error():
     phrases = [
         "🎾 Oops! An unforced error!",
@@ -159,30 +164,33 @@ def random_tennis_error():
         "🏃‍♂️ That one sailed long!",
         "🎯 Just missed the baseline!",
         "🌪 A wild cross-court mishit!",
-        "😬 Net cord… and it didn’t roll over!",
+        "😬 Net cord… and it didn't roll over!",
         "🔥 That rally broke down mid-point!",
         "👀 Hawkeye says… out!"
     ]
     return random.choice(phrases)
 
 
+# ---------------- Intro Animation ----------------
 INTRO_LINES = [
     "Welcome to the World of Tennis.",
     "Where every question is a serve, every answer is a rally, and every conversation is match point.",
     "",
     "Built to serve and volley across the sport - ATP. WTA. Grand Slams. Rivalries. Rankings. Iconic moments.",
     "",
-    "Step onto the court. Start a rally, and let’s play."
+    "Step onto the court. Start a rally, and let's play."
 ]
 
+
 def render_intro_once():
-    # Don’t replay on every rerun
     if st.session_state.get("intro_done", False):
-        # Static version after it’s done
         st.markdown(
             "<div class='intro-wrap intro-card'>" +
-            "".join([f"<div class='intro-line'>{line}</div>" if line else "<div style='height:8px'></div>"
-                     for line in INTRO_LINES]) +
+            "".join([
+                f"<div class='intro-line'>{line}</div>" if line
+                else "<div style='height:8px'></div>"
+                for line in INTRO_LINES
+            ]) +
             "</div>",
             unsafe_allow_html=True
         )
@@ -191,44 +199,29 @@ def render_intro_once():
     holder = st.empty()
 
     for i, line in enumerate(INTRO_LINES):
-        # Alternate left/right for “court entrance”
-        direction_class = "slide-left" if i % 2 == 0 else "slide-right"
-
-        # Build what’s been revealed so far
         revealed = []
         for j in range(i + 1):
             if INTRO_LINES[j] == "":
                 revealed.append("<div style='height:8px'></div>")
             else:
-                anim = ("slide-left" if j % 2 == 0 else "slide-right")
+                anim = "slide-left" if j % 2 == 0 else "slide-right"
                 revealed.append(f"<div class='intro-line {anim}'>{INTRO_LINES[j]}</div>")
 
         holder.markdown(
             "<div class='intro-wrap intro-card'>" + "".join(revealed) + "</div>",
             unsafe_allow_html=True
         )
-        time.sleep(0.22)  # speed of reveal
+        time.sleep(0.22)
 
     st.session_state["intro_done"] = True
+
 
 # ---------------- MAIN APP ----------------
 def main():
     st.set_page_config(page_title="Tennis News Chatbot", page_icon="🎾", layout="wide")
 
-    # CSS Styling
-    #load_css("styles/theme.css")   # ✅ since it's inside /styles
-    #st.write("BG exists:", os.path.exists("assets/grass_blur.png"))
-
-    #set_bg("assets/grass_blur.png")
-
     load_css(str(BASE_DIR / "styles" / "theme.css"))
-
-    bg_path = BASE_DIR / "assets" / "grass_blur.png"
-    st.write("BG exists:", bg_path.exists())
-
-    set_bg(str(bg_path))
-
-    #st.title("🎾 Tennis News Chatbot")
+    set_bg(str(BASE_DIR / "assets" / "grass_blur.png"))
 
     st.markdown("""
     <div class="title-wrapper">
@@ -239,7 +232,6 @@ def main():
         <div class="sub-title">AI-powered Tennis intelligence</div>
     </div>
     """, unsafe_allow_html=True)
-    
 
     render_intro_once()
 
@@ -248,6 +240,7 @@ def main():
         unsafe_allow_html=True
     )
 
+    # ---------------- Quick action buttons ----------------
     col1, col2, col3, col4 = st.columns(4)
     if col1.button("🔥 Latest tennis news"):
         st.session_state.messages.append({"role": "user", "content": "What are the latest tennis headlines today?"})
@@ -262,21 +255,21 @@ def main():
         st.session_state.messages.append({"role": "user", "content": "What are the next big tournaments coming up and who are the favorites?"})
         st.rerun()
 
-
+    # ---------------- API key check ----------------
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        st.error("GROQ_API_KEY not found.")
+        st.error("GROQ_API_KEY not found. Please add it to your .env file.")
         st.stop()
 
+    # ---------------- Sidebar ----------------
     with st.sidebar:
         st.header("⚙️ Settings")
 
-        # --- News refresh ---
         st.subheader("📰 News")
         if st.button("🔄 Refresh news"):
             with st.spinner("Fetching latest articles..."):
                 count = fetch_latest_news(max_items_per_feed=10, hours=48)
-                st.cache_resource.clear()   # force reload of vector DB
+                st.cache_resource.clear()
                 st.success(f"✅ {count} new articles fetched!")
                 st.rerun()
 
@@ -292,7 +285,6 @@ def main():
             top_k = st.slider("Retrieve chunks (k)", 2, 8, 4)
             temperature = st.slider("Creativity", 0.0, 1.0, 0.2, 0.1)
         else:
-            # defaults when hidden
             model = "llama-3.1-8b-instant"
             top_k = 4
             temperature = 0.2
@@ -301,9 +293,11 @@ def main():
             st.session_state.messages = []
             st.rerun()
 
+    # ---------------- Vector DB & Retriever ----------------
     vectordb = load_db()
     retriever = vectordb.as_retriever(search_kwargs={"k": top_k})
 
+    # ---------------- Chat history ----------------
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant", "content": "Hey! Ask me anything about Tennis 🎾"}
@@ -313,13 +307,14 @@ def main():
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
+    # ---------------- User input ----------------
     user_input = st.chat_input("Ask a tennis question…")
 
     if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.rerun()
 
-
+    # ---------------- Generate response ----------------
     if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
         question = st.session_state.messages[-1]["content"]
 
@@ -327,57 +322,43 @@ def main():
             anim = st.empty()
             anim.markdown(render_thinking_animation(), unsafe_allow_html=True)
 
+            # Retrieve relevant context from vector DB
             docs = retriever.invoke(question)
             context = "\n\n".join([d.page_content for d in docs])
 
-            #system = (   
-            #    "You are a tennis assistant. Use context if available. "
-            #    "If insufficient, use general knowledge. Be concise. "
-            #    "If the user asks for latest news, only answer using fetched articles or say you need to fetch."
-            #    "Cite sources when possible."
-            #)
-
+            # System prompt
             system = """You are CourtSide, an expert tennis analyst and journalist.
-            Rules:
-            - For recent news questions: answer ONLY from the provided context. If no context matches, say: "I don't have a recent article on that — try clicking Refresh News in the sidebar."
-            - For general tennis knowledge (rules, history, rankings structure): answer from your training knowledge.
-            - Always mention player names, tournament names, and dates precisely.
-            - Cite sources at the end as: Source: [filename]
-            - Keep answers concise — under 200 words unless asked to elaborate.
-            - If asked about rankings, note that your data may not be live.
-            """
 
-            #user = f"Question: {question}\n\nContext:\n{context}"
+Rules:
+- For recent news questions: answer ONLY from the provided context. If no context matches, say: "I don't have a recent article on that — try clicking Refresh News in the sidebar."
+- For general tennis knowledge (rules, history, rankings structure): answer from your training knowledge.
+- Always mention player names, tournament names, and dates precisely.
+- Cite sources at the end as: Source: [filename]
+- Keep answers concise — under 200 words unless asked to elaborate.
+- If asked about rankings, note that your data may not be live.
+"""
 
-            # Add context to the last user message
+            # Inject context into the last user message, keep full history for memory
             messages_with_context = st.session_state.messages[:-1] + [{
                 "role": "user",
                 "content": f"{question}\n\nRelevant context:\n{context}"
-                }]
-
-            #answer = groq_chat(api_key, user, system, model=model, temperature=temperature)
-            answer = groq_chat(api_key, messages_with_context, system, model=model, temperature=temperature)
+            }]
 
             try:
-                #answer = groq_chat(api_key, user, system, model=model, temperature=temperature)
-                # NEW — sends full conversation history 
                 answer = groq_chat(
                     api_key,
-                    st.session_state.messages,   # full history
+                    messages_with_context,
                     system,
                     model=model,
                     temperature=temperature
-                    )
-                
+                )
             except Exception as e:
                 anim.empty()
                 st.markdown(f"### {random_tennis_error()}")
                 st.info("The server dropped the rally. Try again in a moment.")
                 st.stop()
 
-            #anim.markdown(render_settled_court(), unsafe_allow_html=True)
-            #st.markdown(answer)
-            anim.empty()  # remove bouncing animation
+            anim.empty()
             st.markdown(answer)
             st.markdown(render_settled_court(), unsafe_allow_html=True)
 
